@@ -1,5 +1,9 @@
+<p align="center">
+  <img src="veins3d.png" width="50%" />
+</p>
+
 # Veins 3D
-Extension of the Veins framework for three-dimensional simulation scenarios including the support of 3D antenna patterns as well as several models covering the influence of a three-dimensional environment.
+Veins 3D is an extension of the Veins framework for three-dimensional simulation scenarios including the support of 3D antenna patterns as well as several models covering the influence of a three-dimensional environment.
 
 ## Publications
 Detailed explanations as well as sample simulations (and results) can be found in the following papers:
