@@ -23,13 +23,21 @@ FloorAttenuation::FloorAttenuation(FloorControl& floorControl, double carrierFre
 
 void FloorAttenuation::filterSignal(AirFrame* frame, const Coord& senderPos, const Coord& receiverPos) {
     Signal& s = frame->getSignal();
-
-    double factor = floorControl.calculateAttenuation(senderPos, receiverPos);
-
-    debugEV << "value is: " << factor << endl;
-
     bool hasFrequency = s.getTransmissionPower()->getDimensionSet().hasDimension(Dimension::frequency());
     const DimensionSet& domain = hasFrequency ? DimensionSet::timeFreqDomain() : DimensionSet::timeDomain();
-    ConstantSimpleConstMapping* attMapping = new ConstantSimpleConstMapping(domain, factor);
+
+    ConstantSimpleConstMapping* attMapping = new ConstantSimpleConstMapping(domain,
+            calcAttenuation(senderPos, receiverPos));
     s.addAttenuation(attMapping);
 }
+
+double FloorAttenuation::calcAttenuation(const Coord& senderPos, const Coord& receiverPos) {
+    double factor = floorControl.calculateAttenuation(senderPos, receiverPos);
+    debugEV << "value is: " << factor << endl;
+    return factor;
+}
+
+FloorControl& FloorAttenuation::getFloorControl() const {
+    return floorControl;
+}
+

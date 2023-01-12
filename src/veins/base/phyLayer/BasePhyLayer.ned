@@ -19,6 +19,7 @@ simple BasePhyLayer like IWirelessPhy
 		
 		
         xml analogueModels; 			//Specification of the analogue models to use and their parameters
+        bool useModelSelector = default(false);		//Flag indicating whether the ModelSelector should be used.
         xml decider;					//Specification of the decider to use and its parameters
 
 		double sensitivity @unit(dBm);	//The sensitivity of the physical layer [dBm]

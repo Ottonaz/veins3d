@@ -26,6 +26,10 @@ using Veins::AirFrame;
 #define debugEV EV << "PhyLayer(TwoRayInterferenceModel): "
 
 void TwoRayInterferenceModel::filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos) {
+    filterSignal(frame, senderPos, receiverPos, 1.0);
+}
+
+void TwoRayInterferenceModel::filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos, double scaling) {
 	Signal& s = frame->getSignal();
 
 	const Coord senderPos2D(senderPos.x, senderPos.y);
@@ -44,8 +48,9 @@ void TwoRayInterferenceModel::filterSignal(AirFrame *frame, const Coord& senderP
 	double sin_theta = (ht + hr)/d_ref;
 	double cos_theta = d/d_ref;
 
-	double gamma = (sin_theta - sqrt(epsilon_r - pow(cos_theta,2)))/
-		(sin_theta + sqrt(epsilon_r - pow(cos_theta,2)));
+	double scaledEpsilonR = 1.0 + (epsilon_r - 1.0) * scaling;
+	double gamma = (sin_theta - sqrt(scaledEpsilonR - pow(cos_theta,2)))/
+		(sin_theta + sqrt(scaledEpsilonR - pow(cos_theta,2)));
 
 	//is the signal defined to attenuate over frequency?
 	bool hasFrequency = s.getTransmissionPower()->getDimensionSet().hasDimension(Dimension::frequency());

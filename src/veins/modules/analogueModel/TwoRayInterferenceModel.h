@@ -50,6 +50,7 @@ class TwoRayInterferenceModel: public AnalogueModel {
 		virtual ~TwoRayInterferenceModel() {}
 
 	virtual void filterSignal(AirFrame *frame, const Coord& sendersPos, const Coord& receiverPos);
+	virtual void filterSignal(AirFrame *frame, const Coord& sendersPos, const Coord& receiverPos, double scaling);
 
 
 	protected:

@@ -54,6 +54,22 @@ public:
      */
     virtual void filterSignal(AirFrame* frame, const Coord& senderPos, const Coord& receiverPos);
 
+    /**
+     * @brief Calculates the attenuation due to floor attenuation.
+     *
+     * @param senderPos the sender's position
+     * @param receiverPos the receiver's position
+     * @return value of attenuation in linear units (non-dB)
+     */
+    double calcAttenuation(const Coord& senderPos, const Coord& receiverPos);
+
+    /**
+     * @brief Return a reference to the FloorControl module.
+     *
+     * @return reference to the FloorControl module
+     */
+    FloorControl& getFloorControl() const;
+
 private:
     /** @brief Reference to the FloorControl object */
     FloorControl& floorControl;

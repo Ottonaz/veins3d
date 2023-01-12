@@ -452,6 +452,27 @@ diff -Naru sumo18fresh/sumo-1.8.0/src/netload/NLTriggerBuilder.h sumo-1.8.0/src/
  
  
  
+diff -Naru sumo18fresh/sumo-1.8.0/src/traci-server/TraCIServerAPI_Junction.cpp sumo-1.8.0/src/traci-server/TraCIServerAPI_Junction.cpp
+--- sumo18fresh/sumo-1.8.0/src/traci-server/TraCIServerAPI_Junction.cpp	2020-12-01 22:21:17.000000000 +0100
++++ sumo-1.8.0/src/traci-server/TraCIServerAPI_Junction.cpp	2022-04-11 14:27:00.381252467 +0200
+@@ -44,6 +44,17 @@
+                 case libsumo::VAR_SHAPE:
+                     server.writePositionVector(server.getWrapperStorage(), libsumo::Junction::getShape(id));
+                     break;
++                case libsumo::VAR_PARAMETER: {
++                    std::string paramName;
++                    if (!server.readTypeCheckingString(inputStorage, paramName)) {
++                        return server.writeErrorStatusCmd(libsumo::CMD_GET_JUNCTION_VARIABLE,
++                                                          "Retrieval of a parameter requires its name.",
++                                                          outputStorage);
++                    }
++                    server.getWrapperStorage().writeUnsignedByte(libsumo::TYPE_STRING);
++                    server.getWrapperStorage().writeString(libsumo::Junction::getParameter(id, paramName));
++                    break;
++                }
+                 default:
+                     return server.writeErrorStatusCmd(libsumo::CMD_GET_JUNCTION_VARIABLE, "Get Junction Variable: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
+             }
 diff -Naru sumo18fresh/sumo-1.8.0/src/traci-server/TraCIServer.cpp sumo-1.8.0/src/traci-server/TraCIServer.cpp
 --- sumo18fresh/sumo-1.8.0/src/traci-server/TraCIServer.cpp	2020-12-01 22:21:17.000000000 +0100
 +++ sumo-1.8.0/src/traci-server/TraCIServer.cpp	2021-02-26 10:56:21.172829496 +0100

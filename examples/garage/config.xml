@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
 	<AnalogueModels>
-		<AnalogueModel type="ModelSelector">
+		<AnalogueModel type="GarageModelSelector">
 			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
 			<parameter name="considerDEM" type="bool" value="false"/>
 			<parameter name="demFiles" type="string" value="DTMconverted.tif"/>

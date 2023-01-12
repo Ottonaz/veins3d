@@ -185,7 +185,7 @@ class PhyLayer80211p	: 	public BasePhyLayer,
 
 		AnalogueModel* initializeGarageModels(ParameterMap& params);
 
-		AnalogueModel* initializeModelSelector(ParameterMap& params);
+		AnalogueModel* initializeGarageModelSelector(ParameterMap& params);
 
 		double getCarrierFrequency(ParameterMap& params, std::string caller, double defaultFreq = 5.890e+9);
 

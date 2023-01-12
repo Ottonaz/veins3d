@@ -29,11 +29,13 @@ public:
     const Coord getBboxP2() const;
 
     bool intersectsWith(const Coord& senderPos, const Coord& receiverPos, Coord& intersection) const;
+    bool intersectsWith2D(const Coord& senderPos, const Coord& receiverPos) const;
+    bool isPointInObstacle(Coord point) const;
 
     typedef std::vector<const FloorSegment*> FloorSegs;
 
     /**
-     * @brief class for cirumventing the const-restriction of RTree::Search-context
+     * @brief class for circumventing the const-restriction of RTree::Search-context
      */
     class Result {
     public:
@@ -55,6 +57,8 @@ protected:
     Coords corners;
     Coord bboxP1;
     Coord bboxP2;
+
+    double segmentsIntersectAt(Coord p1From, Coord p1To, Coord p2From, Coord p2To) const;
 };
 
 #endif /* FLOORSEGMENT_H_ */

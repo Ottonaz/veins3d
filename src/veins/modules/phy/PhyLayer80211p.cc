@@ -38,7 +38,7 @@
 #include <veins/modules/analogueModel/FloorAttenuation.h>
 #include "veins/modules/analogueModel/RiceRayleighFading.h"
 #include "veins/modules/analogueModel/GarageModels.h"
-#include "veins/modules/analogueModel/ModelSelector.h"
+#include "veins/modules/analogueModel/GarageModelSelector.h"
 #include <veins/modules/floor/FloorControl.h>
 #include "veins/base/connectionManager/BaseConnectionManager.h"
 #include "veins/modules/utility/Consts80211p.h"
@@ -126,8 +126,8 @@ AnalogueModel* PhyLayer80211p::getAnalogueModelFromName(std::string name, Parame
     else if (name == "GarageModels") {
         return initializeGarageModels(params);
     }
-    else if (name == "ModelSelector") {
-        return initializeModelSelector(params);
+    else if (name == "GarageModelSelector") {
+        return initializeGarageModelSelector(params);
     }
     return BasePhyLayer::getAnalogueModelFromName(name, params);
 }
@@ -624,7 +624,7 @@ AnalogueModel* PhyLayer80211p::initializeGarageModels(ParameterMap& params)
     return new GarageModels(carrierFrequency, numPaths, kFactor, interval);
 }
 
-AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
+AnalogueModel* PhyLayer80211p::initializeGarageModelSelector(ParameterMap& params)
 {
     std::vector<std::string> demFiles;
     bool isRasterType;
@@ -646,7 +646,7 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
         considerDEM = true;
         it = params.find("demFiles");
         if (it == params.end()) {
-            throw cRuntimeError("initializeModelSelector(): No DEM file(s) provided in config.xml");
+            throw cRuntimeError("initializeGarageModelSelector(): No DEM file(s) provided in config.xml");
         }
         else {
             demFiles = split(it->second.stringValue(), ',');
@@ -654,7 +654,7 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
         it = params.find("isRasterType");
         if (it == params.end()) {
             throw cRuntimeError(
-                    "initializeModelSelector(): Not specified whether DEM is raster type or vector type (parameter isRasterType)");
+                    "initializeGarageModelSelector(): Not specified whether DEM is raster type or vector type (parameter isRasterType)");
         }
         else {
             isRasterType = it->second.boolValue();
@@ -662,7 +662,7 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
         it = params.find("diffSpacing");
         if (it == params.end()) {
             throw cRuntimeError(
-                    "initializeModelSelector(): No spacing of distance between height profile points specified");
+                    "initializeGarageModelSelector(): No spacing of distance between height profile points specified");
         }
         else {
             diffSpacing = it->second.doubleValue();
@@ -683,13 +683,13 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
 
     if (!considerDEM && !considerVehicles) {
         throw cRuntimeError(
-                "initializeModelSelector(): At least one of considerDEM and considerVehicles must be set to true");
+                "initializeGarageModelSelector(): At least one of considerDEM and considerVehicles must be set to true");
     }
 
     it = params.find("numPaths");
     if (it == params.end()) {
         throw cRuntimeError(
-                "initializeModelSelector(): Not specified how many paths should be considered (parameter numPaths, recommended: 8)");
+                "initializeGarageModelSelector(): Not specified how many paths should be considered (parameter numPaths, recommended: 8)");
     }
     else {
         numPaths = it->second.longValue();
@@ -698,7 +698,7 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
     it = params.find("kFactor");
     if (it == params.end()) {
         throw cRuntimeError(
-                "initializeModelSelector(): Rician K factor not specified (parameter kFactor in linear units (NOT dB), for Rayleigh fading use 0)");
+                "initializeGarageModelSelector(): Rician K factor not specified (parameter kFactor in linear units (NOT dB), for Rayleigh fading use 0)");
     }
     else {
         kFactor = it->second.doubleValue();
@@ -706,13 +706,13 @@ AnalogueModel* PhyLayer80211p::initializeModelSelector(ParameterMap& params)
 
     it = params.find("interval");
     if (it == params.end()) {
-        throw cRuntimeError("initializeModelSelector(): interval not specified");
+        throw cRuntimeError("initializeGarageModelSelector(): interval not specified");
     }
     else {
         interval = it->second.doubleValue();
     }
 
-    return new ModelSelector(carrierFrequency, demFiles, isRasterType, considerDEM, diffSpacing, demCellSize,
+    return new GarageModelSelector(carrierFrequency, demFiles, isRasterType, considerDEM, diffSpacing, demCellSize,
             considerVehicles, numPaths, kFactor, interval);
 }
 

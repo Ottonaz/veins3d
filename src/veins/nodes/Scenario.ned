@@ -23,6 +23,7 @@ package org.car2x.veins.nodes;
 import org.car2x.veins.base.connectionManager.ConnectionManager;
 import org.car2x.veins.base.modules.BaseWorldUtility;
 import org.car2x.veins.modules.floor.FloorControl;
+import org.car2x.veins.modules.tunnel.TunnelControl;
 import org.car2x.veins.modules.mobility.traci.TraCIScenarioManager*;
 import org.car2x.veins.modules.obstacle.ObstacleControl;
 import org.car2x.veins.modules.world.annotations.AnnotationManager;
@@ -40,6 +41,9 @@ network Scenario
         }
         floorControl: FloorControl {
             @display("p=92,83");
+        }
+        tunnelControl: TunnelControl {
+           @display("p=182,83");
         }
         annotations: AnnotationManager {
             @display("p=260,50");

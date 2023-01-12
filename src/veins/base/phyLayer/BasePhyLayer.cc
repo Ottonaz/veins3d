@@ -28,6 +28,7 @@ BasePhyLayer::BasePhyLayer():
 	thermalNoise(0),
 	radio(0),
 	decider(0),
+	modelSelector(0),
 	radioSwitchingOverTimer(0),
 	txOverTimer(0),
 	headerLength(-1),
@@ -99,6 +100,9 @@ void BasePhyLayer::initialize(int stage) {
 		//read complex(xml) ned-parameters
 		//	- analogue model parameters
 		initializeAnalogueModels(par("analogueModels").xmlValue());
+		//  - optional model selector
+		if (par("useModelSelector").boolValue())
+		    initializeModelSelector();
 		//	- decider parameters
 		initializeDecider(par("decider").xmlValue());
 		//  - antenna parameters
@@ -510,6 +514,10 @@ AnalogueModel* BasePhyLayer::getAnalogueModelFromName(std::string name, Paramete
 	return 0;
 }
 
+void BasePhyLayer::initializeModelSelector() {
+	modelSelector = new ModelSelector(analogueModels);
+}
+
 //--Message handling--------------------------------------
 
 void BasePhyLayer::handleMessage(cMessage* msg) {
@@ -860,8 +868,13 @@ void BasePhyLayer::filterSignal(AirFrame *frame) {
 	const Coord sendersPos  = sendersMobility  ? sendersMobility->getCurrentPosition(/*sStart*/) : NoMobiltyPos;
 	const Coord receiverPos = receiverMobility ? receiverMobility->getCurrentPosition(/*sStart*/): NoMobiltyPos;
 
-	for(AnalogueModelList::const_iterator it = analogueModels.begin(); it != analogueModels.end(); it++)
-		(*it)->filterSignal(frame, sendersPos, receiverPos);
+
+	if (modelSelector) {
+		modelSelector->filterSignal(frame, sendersPos, receiverPos);
+	} else {
+		for(AnalogueModelList::const_iterator it = analogueModels.begin(); it != analogueModels.end(); it++)
+			(*it)->filterSignal(frame, sendersPos, receiverPos);
+	}
 }
 
 //--Destruction--------------------------------
@@ -895,6 +908,11 @@ BasePhyLayer::~BasePhyLayer() {
 	//free Decider
 	if(decider != 0) {
 		delete decider;
+	}
+
+	//free ModelSelector if used
+	if (modelSelector != 0) {
+		delete modelSelector;
 	}
 
 	/*

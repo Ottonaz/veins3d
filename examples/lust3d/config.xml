@@ -8,7 +8,7 @@
 		<AnalogueModel type="EnvironmentalDiffraction">
 			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
 			<parameter name="considerDEM" type="bool" value="true"/>
-			<parameter name="demFiles" type="string" value="DTMconverted.tif"/>
+			<parameter name="demFiles" type="string" value="dtm.tif"/>
 			<parameter name="isRasterType" type="bool" value="true"/>
 			<parameter name="spacing" type="double" value="5"/>
 			<parameter name="demCellSize" type="double" value="1"/>
@@ -19,6 +19,19 @@
 			<obstacles>
 				<type id="building" db-per-cut="9" db-per-meter="0.4" />
 			</obstacles>
+		</AnalogueModel>
+		<AnalogueModel type="FloorAttenuation">
+			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
+			<floors>
+				<type id="general" att-factor="0" />
+			</floors>
+		</AnalogueModel>
+		<AnalogueModel type="NRayGroundInterference">
+			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
+			<parameter name="epsilonR" type="double" value="1.02"/>
+			<parameter name="demFiles" type="string" value="dtm.tif"/>
+			<parameter name="isRasterType" type="bool" value="true"/>
+			<parameter name="spacing" type="double" value="15"/>
 		</AnalogueModel>
 	</AnalogueModels>
 	<Decider type="Decider80211p">

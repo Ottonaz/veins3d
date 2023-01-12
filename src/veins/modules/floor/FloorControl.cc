@@ -282,3 +282,30 @@ double FloorControl::calculateAttenuation(const Coord& senderPos, const Coord& r
     if (dbFactor != 0.0) dbFactor += randGen->draw();
     return FWMath::dBm2mW(dbFactor);
 }
+
+bool FloorControl::groundFloorsBetween(const Coord& senderPos, const Coord& receiverPos)
+{
+    // calculate bounding box of transmission
+    double minB[] = { std::min(senderPos.x, receiverPos.x), std::min(senderPos.y, receiverPos.y), 0.0 };
+    double maxB[] = { std::max(senderPos.x, receiverPos.x), std::max(senderPos.y, receiverPos.y), std::max(senderPos.z,
+            receiverPos.z) };
+
+    FloorSegment::Result result;
+    if (rTree.Search(minB, maxB, result) == 0) {
+        return false;
+    }
+
+    // check floors for 2D intersections
+    for (const FloorSegment* fs : result.floorSegs) {
+        if (fs->intersectsWith2D(senderPos, receiverPos))
+            return true;
+    }
+
+    // check sndPos and rcvPos (are they in 2D shape of floors?)
+    for (const FloorSegment* fs : result.floorSegs) {
+        if (fs->isPointInObstacle(senderPos) || fs->isPointInObstacle(receiverPos))
+            return true;
+    }
+
+    return false;
+}

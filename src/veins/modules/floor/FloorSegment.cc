@@ -84,3 +84,70 @@ bool FloorSegment::intersectsWith(const Coord& senderPos, const Coord& receiverP
 void FloorSegment::addSelf(const Result& queryResult) const {
     queryResult.floorSegs.push_back(this);
 }
+
+
+bool FloorSegment::intersectsWith2D(const Coord& senderPos, const Coord& receiverPos) const
+{
+    Coord v_sr = receiverPos - senderPos;
+    double d2d = sqrt(v_sr.x * v_sr.x + v_sr.y * v_sr.y);
+
+    Coords::const_iterator i = corners.begin();
+    Coords::const_iterator j = (corners.rbegin() + 1).base();
+    bool intersects = false;
+    for (; i != corners.end(); j = i++) {
+        Coord c1 = *i;
+        Coord c2 = *j;
+
+        double relDist = segmentsIntersectAt(senderPos, receiverPos, c1, c2);
+        if (relDist != -1) {
+            double relIntersection = segmentsIntersectAt(c1, c2, senderPos, receiverPos);
+            double segmentZ = c1.z + (c2.z - c1.z)*relIntersection;
+            double losZ = senderPos.z + (receiverPos.z - senderPos.z)*relDist;
+            // if segment is above LOS, there can be no GROUND reflection
+            if (segmentZ > losZ)
+                return false;
+            Coord intersecProfile(d2d * relDist, segmentZ);
+            intersects = true;
+        }
+    }
+
+    return intersects;
+}
+
+bool FloorSegment::isPointInObstacle(Coord point) const
+{
+    bool isInside = false;
+    Coords::const_iterator i = corners.begin();
+    Coords::const_iterator j = (corners.rbegin() + 1).base();
+    for (; i != corners.end(); j = i++) {
+        bool inYRangeUp = (point.y >= i->y) && (point.y < j->y);
+        bool inYRangeDown = (point.y >= j->y) && (point.y < i->y);
+        bool inYRange = inYRangeUp || inYRangeDown;
+        if (!inYRange)
+            continue;
+        bool intersects = point.x < (i->x + ((point.y - i->y) * (j->x - i->x) / (j->y - i->y)));
+        if (!intersects)
+            continue;
+        isInside = !isInside;
+    }
+    return isInside;
+}
+
+double FloorSegment::segmentsIntersectAt(Coord p1From, Coord p1To, Coord p2From, Coord p2To) const
+{
+    Coord p1Vec = p1To - p1From;
+    Coord p2Vec = p2To - p2From;
+    Coord p1p2 = p1From - p2From;
+
+    double D = (p1Vec.x * p2Vec.y - p1Vec.y * p2Vec.x);
+
+    double p1Frac = (p2Vec.x * p1p2.y - p2Vec.y * p1p2.x) / D;
+    if (p1Frac < 0 || p1Frac > 1)
+        return -1;
+
+    double p2Frac = (p1Vec.x * p1p2.y - p1Vec.y * p1p2.x) / D;
+    if (p2Frac < 0 || p2Frac > 1)
+        return -1;
+
+    return p1Frac;
+}

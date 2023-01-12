@@ -276,6 +276,34 @@ std::string TraCICommandInterface::Road::getType()
     return traci->genericGetString(CMD_GET_EDGE_VARIABLE, roadId, VAR_TYPE, RESPONSE_GET_EDGE_VARIABLE);
 }
 
+void TraCICommandInterface::Road::getParameter(const std::string& parameter, double& value)
+{
+    std::string v;
+    getParameter(parameter, v);
+    ParBuffer buf(v);
+    buf >> value;
+}
+
+void TraCICommandInterface::Road::getParameter(const std::string& parameter, std::string& value)
+{
+    TraCIBuffer response = traci->connection.query(CMD_GET_EDGE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_PARAMETER) << roadId << static_cast<uint8_t>(TYPE_STRING) << parameter);
+    uint8_t cmdLength;
+    response >> cmdLength;
+    uint8_t responseId;
+    response >> responseId;
+    ASSERT(responseId == RESPONSE_GET_EDGE_VARIABLE);
+    uint8_t variable;
+    response >> variable;
+    ASSERT(variable == VAR_PARAMETER);
+    std::string id;
+    response >> id;
+    ASSERT(id == roadId);
+    uint8_t type;
+    response >> type;
+    ASSERT(type == TYPE_STRING);
+    response >> value;
+}
+
 std::string TraCICommandInterface::Vehicle::getRoadId()
 {
     return traci->genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_ROAD_ID, RESPONSE_GET_VEHICLE_VARIABLE);
@@ -1067,6 +1095,26 @@ Coord TraCICommandInterface::Junction::getPosition()
 std::list<Coord> TraCICommandInterface::Junction::getShape()
 {
     return traci->genericGetCoordList(CMD_GET_JUNCTION_VARIABLE, junctionId, VAR_SHAPE, RESPONSE_GET_JUNCTION_VARIABLE);
+}
+
+void TraCICommandInterface::Junction::getParameter(const std::string& parameter, std::string& value)
+{
+    TraCIBuffer response = traci->connection.query(CMD_GET_JUNCTION_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_PARAMETER) << junctionId << static_cast<uint8_t>(TYPE_STRING) << parameter);
+    uint8_t cmdLength;
+    response >> cmdLength;
+    uint8_t responseId;
+    response >> responseId;
+    ASSERT(responseId == RESPONSE_GET_JUNCTION_VARIABLE);
+    uint8_t variable;
+    response >> variable;
+    ASSERT(variable == VAR_PARAMETER);
+    std::string id;
+    response >> id;
+    ASSERT(id == junctionId);
+    uint8_t type;
+    response >> type;
+    ASSERT(type == TYPE_STRING);
+    response >> value;
 }
 
 bool TraCICommandInterface::addVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, simtime_t emitTime_st, double emitPosition, double emitSpeed, int8_t emitLane)

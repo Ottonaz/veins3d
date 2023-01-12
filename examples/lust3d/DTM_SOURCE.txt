@@ -1,0 +1,10 @@
+For the generation of the 3D SUMO road network, the following elevation model has been used.
+Due to the large file size, it cannot be included here.
+If you want to simulate the scenario, you have to download the original dataset and perform
+the same steps to generate a dtm.tif file, which can then be used by the running simulation.
+
+https://data.public.lu/fr/datasets/lidar-2019-modele-numerique-de-terrain-mnt/
+License: Creative Commons Zero (CC0)
+Retrieved on 24 March 2022
+original resolution 0.5m, converted to 1m and cropped to the city of Luxembourg,
+and converted to WGS84

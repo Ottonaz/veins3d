@@ -72,13 +72,23 @@ public:
 	virtual void filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos);
 
 	/**
+	 * @brief Filters a specified AirFrame's Signal by adding the resulting attenuation (including scaling of epsilonR).
+	 * @param frame the Airframe in question
+	 * @param senderPos the sender's position
+	 * @param receiverPos the receiver's position
+	 * @param scaling optional scaling of epsilonR
+	 */
+	virtual void filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos, double scaling);
+
+	/**
 	 * @brief calculates the attenuation due to n-ray ground interference.
 	 *
 	 * @param senderPos the sender's position
 	 * @param receiverPos the receiver's position
+	 * @param scaling optional scaling of epsilonR
 	 * @return value of attenuation in linear units (non-dB)
 	 */
-	double calcAttenuation(const Coord& senderPos, const Coord& receiverPos);
+	double calcAttenuation(const Coord& senderPos, const Coord& receiverPos, double scaling = 1.0);
 
 protected:
 	/** @brief Carrier frequency. */

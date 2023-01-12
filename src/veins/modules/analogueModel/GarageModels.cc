@@ -37,7 +37,7 @@ void GarageModels::filterSignal(AirFrame *frame, const Coord& senderPos, const C
         wallFactor = obstCtrl->calculateAttenuation(senderPos, receiverPos, true);
 
         // if no wall and no vehicle in LOS, apply Rice fading (K factor from papers)
-        // otherwise, apply Rayleigh fading (Rice model with K factor 0)
+        // otherwise, apply Rayleigh fading (or Rice model with small K factor, in general)
         if (FWMath::close(wallFactor, 1.0) && FWMath::close(diffFactor, 1.0))
             riceRayleighModel->filterSignal(frame, senderPos, receiverPos);
         else

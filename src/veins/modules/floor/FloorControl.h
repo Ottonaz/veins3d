@@ -32,7 +32,7 @@ public:
 	void addJunctionFromTypeAndShape(std::string id, std::string typeId, std::vector<Coord> shape);
 	double getFactorByType(std::string type);
 	double calculateAttenuation(const Coord& senderPos, const Coord& receiverPos) /*const*/;
-
+	bool groundFloorsBetween(const Coord& senderPos, const Coord& receiverPos);
 protected:
 	Veins::AnnotationManager* annotations;
 	Veins::TraCIConnection* traciConn;

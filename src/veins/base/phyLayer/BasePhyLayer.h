@@ -11,6 +11,7 @@
 #include "veins/base/phyLayer/DeciderToPhyInterface.h"
 #include "veins/base/phyLayer/MacToPhyInterface.h"
 #include "veins/base/phyLayer/Antenna.h"
+#include "veins/base/phyLayer/ModelSelector.h"
 
 #include "veins/base/phyLayer/ChannelInfo.h"
 
@@ -132,6 +133,9 @@ protected:
 	/** @brief List of the analogue models to use.*/
 	AnalogueModelList analogueModels;
 
+	/** @brief Pointer to the ModelSelector (if used). */
+	ModelSelector* modelSelector;
+
 	/**
 	 * @brief Used at initialisation to pass the parameters
 	 * to the AnalogueModel and Decider
@@ -191,6 +195,12 @@ private:
 	 * passed XML-config data.
 	 */
 	void initializeAnalogueModels(cXMLElement* xmlConfig);
+
+	/**
+	 * @brief Initializes the ModelSelector.
+	 */
+	void initializeModelSelector();
+
 
 	/**
 	 * @brief Initializes the Decider with the data from the

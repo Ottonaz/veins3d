@@ -60,6 +60,16 @@ public:
 	 * over time to the Signal.
 	 */
 	virtual void filterSignal(AirFrame *frame, const Coord& sendersPos, const Coord& receiverPos);
+
+	/**
+	 * @brief calculates the attenuation due to obstacle shadowing.
+	 *
+	 * @param senderPos the sender's position
+	 * @param receiverPos the receiver's position
+	 * @param inner set to true to consider inner walls only
+	 * @return value of attenuation in linear units (non-dB)
+	 */
+	double calcAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner = false);
 };
 
 #endif /*PATHLOSSMODEL_H_*/

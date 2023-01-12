@@ -32,6 +32,7 @@
 #include "veins/modules/mobility/traci/TraCIMobility.h"
 #include "veins/modules/obstacle/ObstacleControl.h"
 #include "veins/modules/floor/FloorControl.h"
+#include "veins/modules/tunnel/TunnelControl.h"
 #include "veins/modules/world/traci/trafficLight/TraCITrafficLightInterface.h"
 
 #define LENGTH 4.5 // assumed vehicle length
@@ -457,8 +458,9 @@ void TraCIScenarioManager::init_traci()
             std::string roadName = getCommandInterface()->road(roadId).getName();
 
             // only roads marked as floors are considered
-            // TODO: find better way of only considering elevated roads
-            if (roadName.find("_FLOOR") == std::string::npos)
+            std::string isFloor = "false";
+            getCommandInterface()->road(roadId).getParameter("floor", isFloor);
+            if (isFloor != "true")
                 continue;
 
             std::list<Coord> coords = getCommandInterface()->lane(id).getShape();
@@ -472,11 +474,23 @@ void TraCIScenarioManager::init_traci()
             // TODO: check type similar to obstacles
             //std::string typeId = getCommandInterface()->lane(id).getTypeId();
             //if (!obstacles->isTypeSupported(typeId)) continue;
+
+            // only junctions marked as floors are considered
+            std::string isFloor = "false";
+            getCommandInterface()->junction(id).getParameter("floor", isFloor);
+            if (isFloor != "true")
+                continue;
+
             std::list<Coord> coords = getCommandInterface()->junction(id).getShape();
             std::vector<Coord> shape;
             std::copy(coords.begin(), coords.end(), std::back_inserter(shape));
             floorControl->addJunctionFromTypeAndShape(id, "", shape);
         }
+    }
+
+    TunnelControl* tunnelControl = TunnelControlAccess().getIfExists();
+    if (obstacles && floorControl && tunnelControl) {
+        tunnelControl->addFromNetXml(connection); // a more unified way also using TraCI might be desirable
     }
 
     emit(traciInitializedSignal, true);

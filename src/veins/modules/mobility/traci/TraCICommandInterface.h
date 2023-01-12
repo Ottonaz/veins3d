@@ -282,6 +282,9 @@ public:
         std::string getName();
         std::string getType();
 
+        void getParameter(const std::string& parameter, double& value);
+        void getParameter(const std::string& parameter, std::string& value);
+
     protected:
         TraCICommandInterface* traci;
         TraCIConnection* connection;
@@ -450,6 +453,7 @@ public:
 
         Coord getPosition();
         std::list<Coord> getShape();
+        void getParameter(const std::string& parameter, std::string& value);
 
     protected:
         TraCICommandInterface* traci;

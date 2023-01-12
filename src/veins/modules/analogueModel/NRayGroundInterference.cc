@@ -29,9 +29,13 @@ NRayGroundInterference::NRayGroundInterference(double carrierFrequency, double e
 }
 
 void NRayGroundInterference::filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos) {
+    filterSignal(frame, senderPos, receiverPos, 1.0);
+}
+
+void NRayGroundInterference::filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos, double scaling) {
 	Signal& s = frame->getSignal();
 
-	double factor = calcAttenuation(senderPos, receiverPos);
+	double factor = calcAttenuation(senderPos, receiverPos, scaling);
 	EV << "Attenuation by NRayGroundInterference is: " << factor << endl;
 
 	bool hasFrequency = s.getTransmissionPower()->getDimensionSet().hasDimension(Dimension::frequency());
@@ -40,12 +44,13 @@ void NRayGroundInterference::filterSignal(AirFrame *frame, const Coord& senderPo
 	s.addAttenuation(attMapping);
 }
 
-double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coord& receiverPos) {
+double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coord& receiverPos, double scaling) {
+	double scaledEpsilonR = 1.0 + (epsilonR - 1.0) * scaling;
 	TraCIScenarioManager* traciManager = FindModule<TraCIScenarioManager*>::findGlobalModule();
 	TraCICommandInterface* traciCI = traciManager->getCommandInterface();
 	const NBHeightMapper& hm = NBHeightMapper::get();
 	if (!hm.ready()) throw cRuntimeError("No height map for n-ray ground interference model");
-	std::map<double, Coord> profile;
+	std::vector<Coord> profile;
 	// get 2D positions and horizontal distance
 	Coord snd2D(senderPos.x, senderPos.y);
 	Coord rcv2D(receiverPos.x, receiverPos.y);
@@ -60,15 +65,16 @@ double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coo
 	// compute first and last profile point
 	double lon, lat;
 	std::tie(lon, lat) = traciCI->getLonLat(snd2D);
-	profile[0.0] = Coord(0.0, hm.getZ(Position(lon, lat)));
-	std::tie(lon, lat) = traciCI->getLonLat(rcv2D);
-	profile[dHor] = Coord(dHor, hm.getZ(Position(lon, lat)));
+	profile.push_back(Coord(0.0, hm.getZ(Position(lon, lat))));
 
 	// compute remaining profile points with given spacing in between
 	for (double d = spacing; d < dHor; d += spacing) {
 		std::tie(lon, lat) = traciCI->getLonLat(snd2D + vHor*d);
-		profile[d] = Coord(d, hm.getZ(Position(lon, lat)));
+		profile.push_back(Coord(d, hm.getZ(Position(lon, lat))));
+//		profile.push_back(Coord(d, 0.0));
 	}
+	std::tie(lon, lat) = traciCI->getLonLat(rcv2D);
+	profile.push_back(Coord(dHor, hm.getZ(Position(lon, lat))));
 
 	// compute length of line of sight
 	double dLOS = sqrt(pow(dHor, 2) + pow(senderPos.z - receiverPos.z, 2));
@@ -81,10 +87,10 @@ double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coo
 	int numRefl = 0;
 
 	// check each segment of the profile for potential reflection
-	Coord& prev = profile.begin()->second;
-	for (std::map<double, Coord>::const_iterator it = ++(profile.begin()); it != profile.end(); ++it) {
+	Coord prev = profile[0];
+	for (int i = 1; i < profile.size(); ++i) {
 		const Coord& p1 = prev;
-		const Coord& p2 = it->second;
+		const Coord& p2 = profile[i];
 		Coord seg = p2 - p1;
 		//std::cout << atan2(seg.y, seg.x) << std::endl;
 		// vector from beginning of segment to sender/receiver position
@@ -112,9 +118,9 @@ double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coo
 		Coord sRefl = reflPoint - sndProfile;
 		Coord reflR = rcvProfile - reflPoint;
 		bool cont = false;
-		for (std::map<double, Coord>::const_iterator it2 = ++(profile.begin()); it2 != std::prev(profile.end(), 1); ++it2) {
-			double dist = it2->first;
-			const Coord& profilePoint = it2->second;
+		for (int j = 1; j < profile.size() - 1; ++j) {
+			const Coord& profilePoint = profile[j];
+			double dist = profilePoint.x;
 
 			double check;
 			if (dist < reflPoint.x)
@@ -135,7 +141,7 @@ double NRayGroundInterference::calcAttenuation(const Coord& senderPos, const Coo
 		double deltaPhi = 2*M_PI*(dRef - dLOS)/lambda;
 		double sinTheta = (hT.length() + hR.length())/dRef;
 		double cosTheta = dOnSeg.length()/dRef;
-		double gamma = (sinTheta - sqrt(epsilonR - pow(cosTheta, 2)))/(sinTheta + sqrt(epsilonR - pow(cosTheta, 2)));
+		double gamma = (sinTheta - sqrt(scaledEpsilonR - pow(cosTheta, 2)))/(sinTheta + sqrt(scaledEpsilonR - pow(cosTheta, 2)));
 
 		// add the real and imaginary part of the phasor of this ray to the sums
 		realSum += gamma*cos(deltaPhi)/dRef;
