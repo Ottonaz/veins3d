@@ -145,8 +145,10 @@ std::string Tunnel::getId() const
 
 bool Tunnel::intersectsWith(const Coord& senderPos, const Coord& receiverPos) const
 {
+    double a = 0;
+    double b = 0;
     for (const auto& o: walls) {
-        double obstAtt = o->calculateAttenuation(senderPos, receiverPos);
+        double obstAtt = o->calculateAttenuation(senderPos, receiverPos, &a, &b);
         if (!FWMath::close(obstAtt, 1.0))
             return true;
     }

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "veins/SignalStats.h"
 
 using Veins::TraCIScenarioManagerAccess;
 using Veins::TraCICommandInterface;
@@ -60,24 +61,24 @@ void ModelSelector::filterSignal(AirFrame* frame, const Coord& senderPos, const 
             dynamic_cast<ChannelAccess* const >(frame->getArrivalModule())->getMobilityModule();
     TraCIMobility* receiverTraci = dynamic_cast<TraCIMobility*>(receiverMob);
 
-    std::string senderRoad = senderTraci->getRoadId();
-    std::string receiverRoad = receiverTraci->getRoadId();
+    std::string senderRoad = senderTraci ? senderTraci->getRoadId() : "";
+    std::string receiverRoad = senderTraci ? senderTraci->getRoadId() : "";
 
     // first, check if we are in a special environment, i.e., garage or tunnel
     // TODO cache the results of these queries?
-    std::string sndGarage;
-    traciCI->road(senderRoad).getParameter("garage", sndGarage);
+    std::string sndGarage = "";
+    if(senderRoad != "") traciCI->road(senderRoad).getParameter("garage", sndGarage);
     if (sndGarage != "") {
-        std::string rcvGarage;
-        traciCI->road(receiverRoad).getParameter("garage", rcvGarage);
+        std::string rcvGarage = "";
+        if(receiverRoad != "") traciCI->road(receiverRoad).getParameter("garage", rcvGarage);
         if (sndGarage == rcvGarage) {
             applyGarageModels(frame, senderPos, receiverPos);
             return;
         }
     }
-    std::string sndTunnel, rcvTunnel;
-    traciCI->road(senderRoad).getParameter("tunnel", sndTunnel);
-    traciCI->road(receiverRoad).getParameter("tunnel", rcvTunnel);
+    std::string sndTunnel = "", rcvTunnel = "";
+    if(senderRoad != "") traciCI->road(senderRoad).getParameter("tunnel", sndTunnel);
+    if(receiverRoad != "") traciCI->road(receiverRoad).getParameter("tunnel", rcvTunnel);
     if (sndTunnel != "" || rcvTunnel != "") {
         applyTunnelModels(frame, senderPos, receiverPos, sndTunnel, rcvTunnel);
         return;
@@ -113,7 +114,7 @@ void ModelSelector::applyGarageModels(AirFrame *frame, const Coord& senderPos, c
             diffFactor = environDiff->calcAttenuation(frame, senderPos, receiverPos, true);
 
         if (obstShadowing)
-            wallFactor = obstShadowing->calcAttenuation(senderPos, receiverPos, true);
+            wallFactor = obstShadowing->calcAttenuation(senderPos, receiverPos, true).factor;
 
         // if no wall and no vehicle in LOS, apply Rice fading (K factor from papers)
         // otherwise, apply Rayleigh fading (or Rice model with small K factor, in general)
@@ -170,8 +171,11 @@ bool ModelSelector::applyNLOSModels(AirFrame* frame, const Coord& senderPos, con
     if (FWMath::close(floorFactor, 1.0)) {
         if (environDiff)
             diffFactor = environDiff->calcAttenuation(frame, senderPos, receiverPos);
-        if (obstShadowing)
-            obstFactor = obstShadowing->calcAttenuation(senderPos, receiverPos);
+        if (obstShadowing){
+            SignalStats ss = obstShadowing->calcAttenuation(senderPos, receiverPos);
+            obstFactor = ss.factor;
+            s.setStats(ss);
+        }
     }
 
     // add Mapping of constant attenuation factors
@@ -217,7 +221,7 @@ double ModelSelector::getGroundReflScaling(AirFrame* frame, const std::string& s
     if (txStrWidthIt != streetWidths.end()) {
         txStreetWidth = txStrWidthIt->second;
     } else {
-        traciCI->road(senderRoad).getParameter("streetWidth", txStreetWidth);
+        if(senderRoad != "") traciCI->road(senderRoad).getParameter("streetWidth", txStreetWidth);
         if (txStreetWidth == 0.0) {
             EV << "No street width assigned to edge " << senderRoad << ". Assuming a 120m wide street." << std::endl;
             txStreetWidth = 120.0;
@@ -230,7 +234,7 @@ double ModelSelector::getGroundReflScaling(AirFrame* frame, const std::string& s
         rxStreetWidth = rxStrWidthIt->second;
     }
     else {
-        traciCI->road(receiverRoad).getParameter("streetWidth", rxStreetWidth);
+        if(receiverRoad != "") traciCI->road(receiverRoad).getParameter("streetWidth", rxStreetWidth);
         if (rxStreetWidth == 0.0) {
             EV << "No street width assigned to edge " << receiverRoad << ". Assuming a 120m wide street." << std::endl;
             rxStreetWidth = 120.0;

@@ -400,6 +400,7 @@ public:
 
         std::string getTypeId();
         std::list<Coord> getShape();
+        double getLayer();
         void setShape(const std::list<Coord>& points);
         void remove(int32_t layer);
 

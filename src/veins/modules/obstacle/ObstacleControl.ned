@@ -28,6 +28,7 @@ simple ObstacleControl
         @class(Veins::ObstacleControl);
         bool debug = default(false);  // emit debug messages?
         xml obstacles = default(xml("<obstacles/>")); // list of obstacle types and obstacles to load
+        bool enable3d = default(false);
         @display("i=misc/town");
         @labels(node);
 }

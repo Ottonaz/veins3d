@@ -26,6 +26,8 @@
 #include <queue>
 #include <memory>
 #include <stdint.h>
+
+#include "veins/SignalStats.h"
 #include "veins/base/modules/BaseLayer.h"
 #include "veins/base/phyLayer/MacToPhyControlInfo.h"
 #include "veins/modules/phy/PhyLayer80211p.h"

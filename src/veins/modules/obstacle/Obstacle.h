@@ -24,6 +24,7 @@
 #include <vector>
 #include "veins/base/utils/Coord.h"
 #include "veins/modules/world/annotations/AnnotationManager.h"
+#include "veins/modules/obstacle/polygonTriangulation.h"
 
 /**
  * stores information about an Obstacle for ObstacleControl
@@ -32,18 +33,22 @@ namespace Veins {
 class Obstacle {
 	public:
 		typedef std::vector<Coord> Coords;
+		using Mesh = std::vector<Triangle>;
 
 		Obstacle(std::string id, std::string type, double attenuationPerCut, double attenuationPerMeter);
 
+		void setShape(Coords shape, double height);
 		void setShape(Coords shape);
 		const Coords& getShape() const;
+		const Mesh& getMesh() const;
+    	const double getHeight() const;
 		const Coord getBboxP1() const;
 		const Coord getBboxP2() const;
 
 		std::string getType() const;
 		std::string getId() const;
 
-		double calculateAttenuation(const Coord& senderPos, const Coord& receiverPos) const;
+		double calculateAttenuation(const Coord& senderPos, const Coord& receiverPos, double *totalCuts, double *totalFractionInObstacle ) const;
 
 		AnnotationManager::Annotation* visualRepresentation;
 
@@ -53,6 +58,8 @@ class Obstacle {
 		double attenuationPerCut; /**< in dB. attenuation per exterior border of obstacle */
 		double attenuationPerMeter; /**< in dB / m. to account for attenuation caused by interior of obstacle */
 		Coords coords;
+		double height;
+    	Mesh mesh;
 		Coord bboxP1;
 		Coord bboxP2;
 };

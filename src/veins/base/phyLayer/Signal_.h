@@ -6,6 +6,7 @@
 
 #include "veins/base/utils/MiXiMDefs.h"
 #include "veins/base/phyLayer/Mapping.h"
+#include "veins/SignalStats.h"
 
 /**
  * @brief The signal class stores the physical representation of the
@@ -72,6 +73,8 @@ protected:
 	/** @brief Stores the mapping defining the receiving power of the signal.*/
 	MultipliedMapping* rcvPower;
 
+	SignalStats stats;
+
 protected:
 	/**
 	 * @brief Deletes the rcvPower mapping member because it became
@@ -112,6 +115,9 @@ public:
 	 * @brief Delete the functions of this signal.
 	 */
 	~Signal();
+
+	void setStats(SignalStats stats);
+    SignalStats getStats() const;
 
 	/**
 	 * @brief Returns the point in time when the sending of the Signal started

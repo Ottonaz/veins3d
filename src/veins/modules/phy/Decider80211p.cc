@@ -473,6 +473,7 @@ simtime_t Decider80211p::processSignalEnd(AirFrame* msg) {
 		if (notifyRxStart) {
 			phy->sendControlMsgToMac(new cMessage("RxStartStatus",MacToPhyInterface::PHY_RX_END_WITH_SUCCESS));
 		}
+		result->setSignalStats(signal.getStats());
 		phy->sendUp(frame, result);
 	}
 	else {

@@ -132,7 +132,7 @@ double EnvironmentalDiffraction::calcAttenuation(AirFrame *frame, const Coord& s
                 if (col >= traciManager->carGridCols) break;
                 const std::map<std::string, HostPos*> cell = hostsGrid[row*traciManager->carGridCols + col];
                 for (auto const& host : cell) {
-                    if (host.first == senderTraci->getExternalId() || host.first == receiverTraci->getExternalId())
+                    if (!senderTraci || !receiverTraci || host.first == senderTraci->getExternalId() || host.first == receiverTraci->getExternalId())
                         continue;
                     const Coord& pos = std::get<0>(*(host.second));
                     const Coord& orient = std::get<1>(*(host.second));

@@ -24,6 +24,7 @@
 #include <list>
 
 #include <omnetpp.h>
+#include "veins/SignalStats.h"
 #include "veins/base/utils/Coord.h"
 #include "veins/modules/obstacle/Obstacle.h"
 #include "veins/modules/world/annotations/AnnotationManager.h"
@@ -47,7 +48,7 @@ class ObstacleControl : public cSimpleModule
 		void handleSelfMsg(cMessage *msg);
 
 		void addFromXml(cXMLElement* xml);
-		void addFromTypeAndShape(std::string id, std::string typeId, std::vector<Coord> shape);
+		void addFromTypeAndShape(std::string id, std::string typeId, std::vector<Coord> shape, double height);
 		void add(Obstacle obstacle, bool inner = false);
 		void erase(const Obstacle* obstacle, bool inner = false);
 		bool isTypeSupported(std::string type);
@@ -57,7 +58,7 @@ class ObstacleControl : public cSimpleModule
 		/**
 		 * calculate additional attenuation by obstacles, return signal strength
 		 */
-		double calculateAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner = false) /*const*/;
+		SignalStats calculateAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner = false) /*const*/;
 
 	protected:
 		struct CacheKey {
@@ -87,7 +88,7 @@ class ObstacleControl : public cSimpleModule
 		typedef std::list<Obstacle*> ObstacleGridCell;
 		typedef std::vector<ObstacleGridCell> ObstacleGridRow;
 		typedef std::vector<ObstacleGridRow> Obstacles;
-		typedef std::map<CacheKey, double> CacheEntries;
+		typedef std::map<CacheKey, SignalStats> CacheEntries;
 
 		bool debug; /**< whether to emit debug messages */
 		cXMLElement* obstaclesXml; /**< obstacles to add at startup */

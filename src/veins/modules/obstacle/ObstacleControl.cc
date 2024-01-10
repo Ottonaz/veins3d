@@ -125,6 +125,8 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
             ASSERT(e->getAttribute("shape"));
             std::string shape = e->getAttribute("shape");
 
+            double height = e->getAttribute("height") ?  std::stof(e->getAttribute("height")) : 0;
+
             Obstacle obs(id, type, getAttenuationPerCut(type), getAttenuationPerMeter(type));
             std::vector<Coord> sh;
             cStringTokenizer st(shape.c_str());
@@ -134,7 +136,7 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
                 ASSERT(xya.size() == 2);
                 sh.push_back(Coord(xya[0], xya[1]));
             }
-            obs.setShape(sh);
+            obs.setShape(sh,height);
             if (type == "innerWall") {
                 add(obs, true);
             }
@@ -150,13 +152,19 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
 
 }
 
-void ObstacleControl::addFromTypeAndShape(std::string id, std::string typeId, std::vector<Coord> shape)
+void ObstacleControl::addFromTypeAndShape(std::string id, std::string typeId, std::vector<Coord> shape, double height)
 {
     if (!isTypeSupported(typeId)) {
         throw cRuntimeError("Unsupported obstacle type: \"%s\"", typeId.c_str());
     }
     Obstacle obs(id, typeId, getAttenuationPerCut(typeId), getAttenuationPerMeter(typeId));
     obs.setShape(shape);
+    
+    if(par("enable3d"))
+        obs.setShape(shape, height);
+    else
+        obs.setShape(shape, 0);
+
     if (typeId == "innerWall") {
         add(obs, true);
     }
@@ -222,7 +230,7 @@ void ObstacleControl::erase(const Obstacle* obstacle, bool inner)
         cacheEntries.clear();
 }
 
-double ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner) /*const*/
+SignalStats ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner) /*const*/
 {
     Enter_Method_Silent();
 
@@ -237,7 +245,9 @@ double ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord
     CacheKey cacheKey(senderPos, receiverPos);
     if (!inner) {
         CacheEntries::const_iterator cacheEntryIter = cacheEntries.find(cacheKey);
-        if (cacheEntryIter != cacheEntries.end()) return cacheEntryIter->second;
+        if (cacheEntryIter != cacheEntries.end()) {
+            //return *cacheEntryIter;
+        }
     }
 
     // calculate bounding box of transmission
@@ -251,7 +261,10 @@ double ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord
 
     Obstacles& obstCollection = inner ? innerWalls : obstacles;
     std::set<Obstacle*> processedObstacles;
+    double totalDistance = senderPos.distance(receiverPos);
     double factor = 1;
+    double totalCuts = 0;
+    double totalFractionInObstacle = 0;
     for (size_t col = fromCol; col <= toCol; ++col) {
         if (col >= obstCollection.size()) break;
         for (size_t row = fromRow; row <= toRow; ++row) {
@@ -272,7 +285,7 @@ double ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord
 
                 double factorOld = factor;
 
-                factor *= o->calculateAttenuation(senderPos, receiverPos);
+                factor *= o->calculateAttenuation(senderPos, receiverPos, &totalCuts, &totalFractionInObstacle);
 
                 // draw a "hit!" bubble
                 if (annotations && (factor != factorOld)) annotations->drawBubble(o->getBboxP1(), "hit");
@@ -283,14 +296,15 @@ double ObstacleControl::calculateAttenuation(const Coord& senderPos, const Coord
             }
         }
     }
+    SignalStats ss = SignalStats(totalCuts,totalDistance,totalFractionInObstacle,factor);
 
     // cache result
     if (!inner) {
         if (cacheEntries.size() >= 1000) cacheEntries.clear();
-        cacheEntries[cacheKey] = factor;
+        //cacheEntries[cacheKey] = ss;
     }
 
-    return factor;
+    return ss;
 }
 
 double ObstacleControl::getAttenuationPerCut(std::string type)

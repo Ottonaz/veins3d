@@ -114,6 +114,14 @@ Signal::~Signal()
 	}
 }
 
+void Signal::setStats(SignalStats stats) {
+    this->stats = stats;
+}
+SignalStats Signal::getStats() const{
+    return stats;
+}
+
+
 simtime_t_cref Signal::getSendingStart() const {
 	return sendingStart;
 }

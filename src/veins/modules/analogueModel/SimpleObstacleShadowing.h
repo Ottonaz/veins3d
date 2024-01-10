@@ -1,6 +1,7 @@
 #ifndef SIMPLEOBSTACLEFADING_H_
 #define SIMPLEOBSTACLEFADING_H_
 
+#include "veins/SignalStats.h"
 #include "veins/base/phyLayer/AnalogueModel.h"
 #include "veins/base/phyLayer/Mapping.h"
 #include "veins/base/modules/BaseWorldUtility.h"
@@ -69,7 +70,7 @@ public:
 	 * @param inner set to true to consider inner walls only
 	 * @return value of attenuation in linear units (non-dB)
 	 */
-	double calcAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner = false);
+	SignalStats calcAttenuation(const Coord& senderPos, const Coord& receiverPos, bool inner = false);
 };
 
 #endif /*PATHLOSSMODEL_H_*/

@@ -10,6 +10,7 @@
 #include <omnetpp.h>
 
 #include "veins/base/utils/MiXiMDefs.h"
+#include "veins/SignalStats.h"
 #include "veins/base/phyLayer/DeciderToPhyInterface.h"
 #include "veins/base/messages/ChannelSenseRequest_m.h"
 #include "veins/base/phyLayer/ChannelState.h"
@@ -35,6 +36,7 @@ class MIXIM_API DeciderResult
 protected:
 	/** Stores if the AirFrame for this result was received correct.*/
 	bool isCorrect;
+	SignalStats signalStats;
 public:
 
 	virtual ~DeciderResult() {}
@@ -50,6 +52,14 @@ public:
 	 * @brief A Function that returns a very basic result about the Signal.
 	 */
 	 virtual bool isSignalCorrect() const;
+
+	void setSignalStats(SignalStats stats)
+    {
+        signalStats = stats;
+    }
+    SignalStats getSignalStats() const{
+        return signalStats;
+    }
 
 };
 

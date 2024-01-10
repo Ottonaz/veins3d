@@ -47,7 +47,7 @@ void GarageModelSelector::filterSignal(AirFrame *frame, const Coord& senderPos, 
     }
 
     // at least one vehicle is outside, thus apply normal models
-    double obstFactor = obstCtrl->calculateAttenuation(senderPos, receiverPos);
+    double obstFactor = obstCtrl->calculateAttenuation(senderPos, receiverPos).factor;
     double diffFactor = diffModel->calcAttenuation(frame, senderPos, receiverPos);
     double floorFactor = floorCtrl->calculateAttenuation(senderPos, receiverPos);
 

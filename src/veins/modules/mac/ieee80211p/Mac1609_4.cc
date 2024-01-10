@@ -25,6 +25,7 @@
 #include "veins/base/phyLayer/PhyToMacControlInfo.h"
 #include "veins/modules/messages/PhyControlMessage_m.h"
 #include "veins/modules/messages/AckTimeOutMessage_m.h"
+#include "veins/modules/Statistics.h"
 
 using std::unique_ptr;
 using omnetpp::simtime_t;
@@ -41,7 +42,13 @@ using omnetpp::simTime;
 
 Define_Module(Mac1609_4);
 
+Statistics * statsModule = nullptr;
+
 void Mac1609_4::initialize(int stage) {
+	//cModule* mod = getModuleByPath("statistics");
+    //statsModule = dynamic_cast<Statistics *>(mod);
+    statsModule = (Statistics*)getModuleByPath("statistics");
+
 	BaseMacLayer::initialize(stage);
 	if (stage == 0) {
 
@@ -600,6 +607,29 @@ void Mac1609_4::handleLowerMsg(cMessage* msg) {
 			handleUnicast(std::move(wsm));
 		}
 	} else if (dest == LAddress::L2BROADCAST()) {
+
+		SignalStats signalStats = res->getSignalStats();
+
+		if(statsModule){
+			
+			BaseMobility* mobMod = (BaseMobility *)getParentModule()->getParentModule()->getSubmodule("mobility");
+
+			if(mobMod == nullptr)
+				mobMod = (BaseMobility *)getParentModule()->getParentModule()->getSubmodule("veinsmobility");
+
+			statsModule ->writeDataToCSV( macPkt->getSrcAddr(),
+						this->getMACAddress(),
+						mobMod->getCurrentPosition().x,
+						mobMod->getCurrentPosition().y,
+						res->getSnr(),
+						res->getRecvPower_dBm(),
+						simTime().dbl(),
+						((BaseMobility *)getModuleByPath("MultipleRSUScenario.rsu[0].mobility"))->getCurrentPosition().z,
+						getParentModule()->getParentModule()->getFullName(),
+						signalStats
+					);
+    	}
+
 		statsReceivedBroadcasts++;
 		unique_ptr<WaveShortMessage> wsm(check_and_cast<WaveShortMessage*>(macPkt->decapsulate()));
 		wsm->setControlInfo(new PhyToMacControlInfo(res));
