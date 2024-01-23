@@ -1,0 +1,1 @@
+ awk '{print $4, $5}' bs.csv | cs2cs +init=epsg:2169 +to +proj=utm +zone=32 |  awk '{print $1, $2}' > bs_converted.csv

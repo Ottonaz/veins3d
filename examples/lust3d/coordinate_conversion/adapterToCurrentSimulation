@@ -1,0 +1,1 @@
+ awk '{print "*.rsu[" ++i-1 "].mobility.x =" $1 - 285422.66 "\n" "*.rsu[" i-1 "].mobility.y =" 11480 - ($2 - 5492398.13)}' bs_converted.csv > bs_converted_adapted.csv
