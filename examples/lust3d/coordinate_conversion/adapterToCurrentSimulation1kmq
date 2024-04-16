@@ -1,0 +1,6 @@
+awk '{
+  if ($1 >= 290339.024 && $1 <= 291919.388 && $2 >= 5498860.043 && $2 <= 5499577.390) {
+    print "*.rsu[" ++i-1 "].mobility.x =" $1 - 285422.66 "\n" "*.rsu[" i-1 "].mobility.y =" 11480 - ($2 - 5492398.13);
+  }
+}' bs_converted.csv > bs_converted_adapted.csv
+

@@ -4,11 +4,16 @@
 Define_Module(Statistics);
 
 void Statistics::initialize(int stage) {
+    
+    std::string enable3d = "2d";
+    if(((BaseMacLayer *)getModuleByPath("MultipleRSUScenario.obstacles"))->par("enable3d"))
+	   enable3d = "3d";
 
-    run = getSimulation()->getActiveEnvir()->getConfigEx()->getActiveRunNumber();
+   double z = ((BaseMobility *)getModuleByPath("MultipleRSUScenario.rsu[0].mobility"))->getCurrentPosition().z;
+
 
     std::stringstream a;
-    a << par("outputFilePath").stringValue() << "-#" << run << ".csv";
+    a << par("outputFilePath").stringValue() << "-" << z << "m-" << enable3d.c_str() << ".csv";
     outputFilePath =  a.str();
     EV_TRACE << "Output file path: " << outputFilePath << endl;
 
